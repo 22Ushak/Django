@@ -1,89 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ desc.name }}</title>
-    <link rel="stylesheet" href="/static/styles.css"> <!-- Ensure correct path -->
-</head>
-<body>
-    <h1>{{ desc.name }}</h1>
-    <img src="{{ desc.img.url }}" alt="{{ desc.name }}">
-    <h2>{{ desc.desc|safe }}</h2>
-    <h2>Price: ₹{{ desc.price }}</h2>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>{{ desc.name }}</title>
+      <link rel="stylesheet" href="/static/styles.css"> <!-- Ensure correct path -->
+  </head>
+  <body>
 
-    <!-- Comment Section -->
-    <h3>Comments ({{ parent_comment_count }})</h3>
-    
-    {% if comments %}
-        <ul>
-            {% for comment in comments %}
-                <li>
-                    <strong>{{ comment.user.username }}</strong>: {{ comment.comment }} <br>
-                    <small>{{ comment.created_at }}</small> 
-                    <br>
-                    <small>Replies: {{ comment.child_count }}</small>
-                    <br>
-                    
-                    <!-- Like & Dislike Buttons -->
-                    <form method="POST" action="{% url 'like_dislike_comment' comment.id 'like' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit">👍 Like ({{ comment.total_likes }})</button>
-                    </form>
-                    
-                    <form method="POST" action="{% url 'like_dislike_comment' comment.id 'dislike' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit">👎 Dislike ({{ comment.total_dislikes }})</button>
-                    </form>
-                    
-                    <!-- Reply Form -->
-                    {% if user.is_authenticated %}
-                        <form method="POST" style="margin-top: 10px;">
-                            {% csrf_token %}
-                            <input type="hidden" name="parent_comment" value="{{ comment.id }}">
-                            <textarea name="comment" rows="3" placeholder="Write a reply..." required></textarea>
-                            <br>
-                            <button type="submit">Post Reply</button>
-                        </form>
-                    {% endif %}
-                    
-                    <!-- Display Replies -->
-                    {% for reply in comment.replies.all %}
-                        <div style="margin-left: 20px;">
-                            <strong>{{ reply.user.username }}</strong>: {{ reply.comment }} <br>
-                            <small>{{ reply.created_at }}</small>
-                            <br>
-                            
-                            <!-- Like & Dislike for Replies -->
-                            <form method="POST" action="{% url 'like_dislike_comment' reply.id 'like' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit">👍 Like ({{ reply.total_likes }})</button>
-                            </form>
-                            
-                            <form method="POST" action="{% url 'like_dislike_comment' reply.id 'dislike' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit">👎 Dislike ({{ reply.total_dislikes }})</button>
-                            </form>
-                        </div>
-                    {% endfor %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No comments yet. Be the first to comment!</p>
-    {% endif %}
+    <a href="{% url 'index' %}">
+         <button class="back-to-home-button" style="float: right;">Back to Home</button>
+    </a>
+           
 
-    <!-- Comment Form -->
-    {% if user.is_authenticated %}
-        <form method="POST">
-            {% csrf_token %}
-            <textarea name="comment" rows="4" placeholder="Write a comment..." required></textarea>
-            <br>
-            <button type="submit">Post Comment</button>
-        </form>
-    {% else %}
-        <p><a href="{% url 'login' %}">Log in</a> to post a comment.</p>
-    {% endif %}
-</body>
-</html>
+      <h1>{{ desc.name }}</h1>
+      <img src="{{ desc.img.url }}" alt="{{ desc.name }}">
+      <h2>{{ desc.desc|safe }}</h2>
+      <h2>Price: ₹{{ desc.price }}</h2>
+         
+  
+      <!-- Comment Section -->
+      <h3>Comments ({{ parent_comment_count }})</h3>
+      
+      {% if comments %}
+          <ul>
+              {% for comment in comments %}
+                  <li>
+                      <strong>{{ comment.user.username }}</strong>: {{ comment.comment }} <br>
+                      <small>{{ comment.created_at }}</small> 
+                      <br>
+                      <small>Replies: {{ comment.child_count }}</small>
+                      <br>
+                      
+                      <!-- Like & Dislike Buttons -->
+                      <form method="POST" action="{% url 'like_dislike_comment' comment.id 'like' %}" style="display: inline;">
+                          {% csrf_token %}
+                          <button type="submit">👍  ({{ comment.total_likes }})</button>
+                      </form>
+                      
+                      <form method="POST" action="{% url 'like_dislike_comment' comment.id 'dislike' %}" style="display: inline;">
+                          {% csrf_token %}
+                          <button type="submit">👎  ({{ comment.total_dislikes }})</button>
+                      </form>
+                      
+                      <!-- Reply Form -->
+                      {% if user.is_authenticated %}
+                          <form method="POST" style="margin-top: 10px;">
+                              {% csrf_token %}
+                              <input type="hidden" name="parent_comment" value="{{ comment.id }}">
+                              <textarea name="comment" rows="3" placeholder="Write a reply..." required></textarea>
+                              <br>
+                              <button type="submit">Post Reply</button>
+                          </form>
+                      {% endif %}
+                      
+                      <!-- Display Replies -->
+                      {% for reply in comment.replies.all %}
+                          <div style="margin-left: 20px;">
+                              <strong>{{ reply.user.username }}</strong>: {{ reply.comment }} <br>
+                              <small>{{ reply.created_at }}</small>
+                              <br>
+                              
+                              <!-- Like & Dislike for Replies -->
+                              <form method="POST" action="{% url 'like_dislike_comment' reply.id 'like' %}" style="display: inline;">
+                                  {% csrf_token %}
+                                  <button type="submit">👍  ({{ reply.total_likes }})</button>
+                              </form>
+                              
+                              <form method="POST" action="{% url 'like_dislike_comment' reply.id 'dislike' %}" style="display: inline;">
+                                  {% csrf_token %}
+                                  <button type="submit">👎  ({{ reply.total_dislikes }})</button>
+                              </form>
+                          </div>
+                      {% endfor %}
+                  </li>
+              {% endfor %}
+          </ul>
+      {% else %}
+          <p>No comments yet. Be the first to comment!</p>
+      {% endif %}
+  
+      <!-- Comment Form -->
+      {% if user.is_authenticated %}
+          <form method="POST">
+              {% csrf_token %}
+              <textarea name="comment" rows="4" placeholder="Write a comment..." required></textarea>
+              <br>
+              <button type="submit">Post Comment</button>
+          </form>
+      {% else %}
+          <p><a href="{% url 'login' %}">Log in</a> to post a comment.</p>
+      {% endif %}
+  </body>
+  </html>   
+
+
+
+
+        
