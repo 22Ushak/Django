@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User , auth
 from django.contrib import messages
+import re
 # Create your views here.
 
 def login(request):
@@ -34,9 +35,15 @@ def register(request):
             if User.objects.filter(username=username).exists():
                 messages.info(request,'Username Taken')
                 return redirect('register')
+            
+            elif not re.match(r"^[a-zA-Z0-9_.+-]+@(gmail\.com|yahoo\.com|mnkgcs.com)$", email):
+                messages.info(request, "Please use a valid email address with @gmail.com or @yahoo.com or @mnkgcs.com")
+                return redirect('register')
+        
             elif User.objects.filter(email=email).exists():
                 messages.info(request,'Email Taken')   
                 return redirect('register')
+            
 
             else:    
                 user = User.objects.create_user(username=username,password=password1,email=email,first_name=first_name,last_name=last_name)
