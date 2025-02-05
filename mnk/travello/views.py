@@ -10,21 +10,19 @@ def index(request):
 def details(request, id):
     ip = get_client_ip(request)  # Get user's IP address
 
-    # Allow logged-in users unrestricted access
     if not request.user.is_authenticated:
-        # Use session to track places visited by the user
-        if 'visited_places' not in request.session:
+        
+        if 'visited_places' not in request.session:# Use session to track places visited by the user
             request.session['visited_places'] = []
 
         visited_places = request.session['visited_places']
 
-        # If the user has already visited 2 places, restrict further visits (including revisiting places)
         if len(visited_places) >= 2:
             # Check if this place is already visited or if it's the 3rd place
             if id in visited_places:
-                return redirect('register_first')  # Redirect if visiting the same place again
+                return redirect('register_first')  
             else:
-                return redirect('register_first')  # Redirect if trying to visit a 3rd place
+                return redirect('register_first')  
 
         # Add the place to the visited list if it's not already in it
         if id not in visited_places:
