@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    
 ]
 
 MIDDLEWARE = [
@@ -80,13 +81,13 @@ WSGI_APPLICATION = 'mnk.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME':BASE_DIR/'db.sqlite3',
-        
-        # 'USER' : 'postgres',
-        # 'Password' : 1234,
-        # 'HOST': 'localhost',
-        # 'PORT' : 5432
+       
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'user_data',         
+        'USER': 'postgres',         
+        'PASSWORD': '1234', 
+        'HOST': 'localhost',            
+        'PORT': '5432',
     }
 }
 
@@ -137,5 +138,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
+
+# Maximum upload size in bytes (e.g., 100 MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+
 
 

@@ -1,7 +1,18 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Destination, Comments, IPVisit
+from .models import Destination, Comments, IPVisit,CustomUser
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User, auth
+# from django.contrib.auth.models import User, auth
+from .forms import UploadCSVForm
+import csv
+from django.http import HttpResponse
+from .forms import UploadCSVForm
+from .models import User
+from datetime import datetime
+# import io
+# from django.core.exceptions import ValidationError
+# from .models import User
+# from django.core.files.storage import FileSystemStorage
+
 
 def index(request):
     dests = Destination.objects.all()
@@ -94,4 +105,96 @@ def get_client_ip(request):
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-    return ip
+    return ip 
+
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from .forms import UploadCSVForm
+from .models import CustomUser  # Assuming this is your model to store user data
+import csv
+import psycopg2
+from psycopg2 import extras
+from django.core.files.storage import FileSystemStorage
+import io
+
+# Function to insert data into the database in batches
+def insert_data_to_db(cursor, rows):
+    insert_query = '''
+        INSERT INTO CustomUser (id, name, email, address, status, created_at, updated_at)
+        VALUES %s
+        ON CONFLICT (email) DO NOTHING  -- Prevent duplicate email insertions
+    '''
+    extras.execute_values(cursor, insert_query, rows)
+    cursor.connection.commit() 
+def insert_data_in_chunks(file, chunk_size=100):
+    conn = psycopg2.connect(
+        host='localhost',
+        dbname='user_data',
+        user='postgres',   
+        password='1234', 
+    )
+    cursor = conn.cursor()
+
+   
+    file.seek(0) 
+    reader = csv.reader(io.StringIO(file.read().decode('utf-8')))
+    header = next(reader) 
+    
+    rows = []
+    for row in reader:
+        if len(row) != 7:  
+            continue 
+
+        try:
+            id, name, email, address, status, created_at, updated_at = row
+            created_at = created_at.strip() 
+            updated_at = updated_at.strip()
+
+            rows.append((
+                int(id),
+                name,
+                email,
+                address,
+                status,
+                created_at,
+                updated_at
+            ))
+
+        except ValueError:
+            continue
+
+        if len(rows) >= chunk_size:
+            insert_data_to_db(cursor, rows)
+            rows = []  
+    if rows:
+        insert_data_to_db(cursor, rows)
+    
+    cursor.close()
+    conn.close()
+
+@login_required
+def upload_csv(request):
+    """
+    This view handles the CSV file upload, processes the file, and inserts its data into the database.
+    """
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        form = UploadCSVForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+
+            try:
+                insert_data_in_chunks(csv_file, chunk_size=100)
+                return HttpResponse('CSV file has been successfully uploaded and data has been inserted into the database.')
+
+            except Exception as e:
+                return HttpResponse(f"An error occurred while processing the CSV file: {e}")
+    else:
+        form = UploadCSVForm()
+
+    return render(request, 'upload_csv.html', {'form': form})
+
+
+
